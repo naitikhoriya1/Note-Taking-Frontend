@@ -2,13 +2,14 @@ import { MdClose } from "react-icons/md";
 import TagInput from "../components/TagInput";
 import { useState } from "react";
 import axiosInstances from "../utils/axiosInstances";
+import PropTypes from "prop-types";
 
 const AddEditNotes = ({
   noteData,
   type,
   getAllNotes,
   onClose,
-  showtoastMsg,
+  showToastMessage,
 }) => {
   const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
@@ -24,17 +25,20 @@ const AddEditNotes = ({
         tags,
       });
       if (response.data && response.data.note) {
-        showtoastMsg("Note Added Successfully");
+        showToastMessage("Note Added Successfully", "add");
         getAllNotes();
-        onclose();
+        onClose();
       }
     } catch (error) {
+      console.error("Add note error:", error);
       if (
         error.response &&
         error.response.data &&
         error.response.data.message
       ) {
         setError(error.response.data.message);
+      } else {
+        setError("Failed to add note. Please try again.");
       }
     }
   };
@@ -48,17 +52,20 @@ const AddEditNotes = ({
         tags,
       });
       if (response.data && response.data.note) {
-        showtoastMsg("Note Edited Successfully");
+        showToastMessage("Note Edited Successfully", "add");
         getAllNotes();
-        onclose();
+        onClose();
       }
     } catch (error) {
+      console.error("Edit note error:", error);
       if (
         error.response &&
         error.response.data &&
         error.response.data.message
       ) {
         setError(error.response.data.message);
+      } else {
+        setError("Failed to edit note. Please try again.");
       }
     }
   };
@@ -123,6 +130,19 @@ const AddEditNotes = ({
       </button>
     </div>
   );
+};
+
+AddEditNotes.propTypes = {
+  noteData: PropTypes.object,
+  type: PropTypes.string.isRequired,
+  getAllNotes: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  showToastMessage: PropTypes.func.isRequired,
+};
+
+AddEditNotes.defaultProps = {
+  noteData: null,
+  type: "add",
 };
 
 export default AddEditNotes;
