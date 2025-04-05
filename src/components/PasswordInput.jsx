@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import PropTypes from "prop-types";
 
 const PasswordInput = ({ value, onChange, placeholder }) => {
   const [isShowPassword, setIsShowPassword] = useState(false);
@@ -7,39 +8,47 @@ const PasswordInput = ({ value, onChange, placeholder }) => {
   const toggleShowPassword = () => {
     setIsShowPassword(!isShowPassword);
   };
+
   return (
     <div>
       <label
-        htmlFor="email"
+        htmlFor="password"
         className="block text-sm font-medium leading-6 text-gray-900"
       >
         Password
       </label>
-      <div className="flex items-center justify-between bg-transparent border-[1.5] rounded">
+      <div className="relative flex items-center justify-between bg-transparent rounded mt-1">
         <input
+          id="password"
           value={value}
           onChange={onChange}
           type={isShowPassword ? "text" : "password"}
-          placeholder={placeholder || "password"}
-          className="pl-3 w-full text-sm bg-transparent py-2 mr-3 rounded outline-none border-solid border-2"
-          // className=" w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 outline-none"
+          placeholder={placeholder || "Password"}
+          className="pl-3 w-full text-xs md:text-sm bg-transparent py-1.5 md:py-2 rounded outline-none border-solid border-2 pr-8"
         />
-        {isShowPassword ? (
-          <FaRegEye
-            size={22}
-            className="text-primary cursor-pointer"
-            onClick={() => toggleShowPassword()}
-          />
-        ) : (
-          <FaRegEyeSlash
-            size={22}
-            className="text-slate-400 cursor-pointer"
-            onClick={() => toggleShowPassword()}
-          />
-        )}
+        <div
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+          onClick={toggleShowPassword}
+        >
+          {isShowPassword ? (
+            <FaRegEye size={18} className="text-primary" />
+          ) : (
+            <FaRegEyeSlash size={18} className="text-slate-400" />
+          )}
+        </div>
       </div>
     </div>
   );
+};
+
+PasswordInput.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+};
+
+PasswordInput.defaultProps = {
+  placeholder: "Password",
 };
 
 export default PasswordInput;

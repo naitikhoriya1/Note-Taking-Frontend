@@ -17,7 +17,7 @@ const Home = () => {
     data: null,
   });
 
-  const [showtoastMsg, setShowToastMsg] = useState({
+  const [showToastMsg, setShowToastMsg] = useState({
     isShown: false,
     message: "",
     type: "add",
@@ -26,7 +26,7 @@ const Home = () => {
   const [allNotes, setAllNotes] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
 
-  const Navigate = useNavigate;
+  const navigate = useNavigate();
 
   // Get user info
   const getUserInfo = async () => {
@@ -36,12 +36,10 @@ const Home = () => {
         setUserInfo(response.data.user);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
+      console.error("Error fetching user info:", error);
       if (error.response && error.response.status === 401) {
         localStorage.clear();
-        Navigate("/login");
+        navigate("/login");
       }
     }
   };
@@ -49,20 +47,23 @@ const Home = () => {
   const showToastMessage = (message, type) => {
     setShowToastMsg({ isShown: true, message, type });
   };
+
   const handleCloseToast = () => {
-    setShowtoastMsg({ isShown: false, message: "", type: "add" });
+    setShowToastMsg({ isShown: false, message: "", type: "add" });
   };
 
-  // Get all note
-  const getALlNotes = async () => {
+  // Get all notes
+  const getAllNotes = async () => {
     try {
       const response = await axiosInstances.get("/get-all-notes");
-
       if (response.data && response.data.notes) {
         setAllNotes(response.data.notes);
+      } else {
+        setAllNotes([]);
       }
     } catch (error) {
-      console.log("Please try again ");
+      console.error("Error fetching notes:", error);
+      setAllNotes([]);
     }
   };
 
@@ -79,9 +80,8 @@ const Home = () => {
     const noteId = data._id;
     try {
       const response = await axiosInstances.delete("/delete-note/" + noteId);
-
       if (response.data && !response.data.error) {
-        showtoastMsg("Note Deleted Successfully", "delete");
+        showToastMessage("Note Deleted Successfully", "delete");
         getAllNotes();
       }
     } catch (error) {
@@ -90,24 +90,24 @@ const Home = () => {
         error.response.data &&
         error.response.data.message
       ) {
-        console.log("Please try again ");
+        console.log("Please try again");
       }
     }
   };
 
   useEffect(() => {
-    getALlNotes();
+    getAllNotes();
     getUserInfo();
   }, []);
 
   return (
     <>
       <Navbar userInfo={userInfo} />
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         {allNotes.length > 0 ? (
-          <div className="grid grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {allNotes &&
-              allNotes.map((item, index) => (
+              allNotes.map((item) => (
                 <NoteCard
                   key={item._id}
                   title={item.title}
@@ -126,7 +126,7 @@ const Home = () => {
         )}
       </div>
       <button
-        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 absolute right-10 bottom-10"
+        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 fixed right-4 bottom-4 md:right-10 md:bottom-10 z-10"
         onClick={() => {
           setOpenAddEditModal({ isShown: true, type: "add", data: null });
         }}
@@ -135,14 +135,16 @@ const Home = () => {
       </button>
       <Modal
         isOpen={openAddEditModal.isShown}
-        onRequestClose={() => {}}
+        onRequestClose={() => {
+          setOpenAddEditModal({ isShown: false, type: "add", data: null });
+        }}
         style={{
           overlay: {
             backgroundColor: "rgba(0,0,0,0.2)",
           },
         }}
         contentLabel=""
-        className="w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 overflow-scroll"
+        className="w-[90%] md:w-[70%] lg:w-[50%] max-h-[80vh] bg-white rounded-md mx-auto mt-14 p-4 overflow-scroll"
       >
         <AddEditNotes
           type={openAddEditModal.type}
@@ -150,14 +152,14 @@ const Home = () => {
           onClose={() => {
             setOpenAddEditModal({ isShown: false, type: "add", data: null });
           }}
-          getALlNotes={getALlNotes}
-          showToastMessage={showtoastMsg}
+          getAllNotes={getAllNotes}
+          showToastMessage={showToastMessage}
         />
       </Modal>
       <Toast
-        isShown={showtoastMsg.isShown}
-        message={showtoastMsg.message}
-        type={showtoastMsg.type}
+        isShown={showToastMsg.isShown}
+        message={showToastMsg.message}
+        type={showToastMsg.type}
         onClose={handleCloseToast}
       />
     </>
